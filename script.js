@@ -82,7 +82,13 @@ function updateCartCount() {
 function initNav() {
   const toggle = document.querySelector('[data-nav-toggle]');
   const links = document.querySelector('[data-nav-links]');
-  if (toggle && links) {
+  // Guard against double-initialization: both header.js (right after
+  // injecting the nav markup) and this file's own DOMContentLoaded
+  // listener call initNav(), so without this flag the click handler
+  // gets attached twice — meaning one tap fires both listeners and
+  // the menu opens then immediately closes in the same click.
+  if (toggle && links && !toggle.dataset.navBound) {
+    toggle.dataset.navBound = 'true';
     toggle.addEventListener('click', () => {
       links.classList.toggle('open');
       const icon = toggle.querySelector('[data-icon]');
