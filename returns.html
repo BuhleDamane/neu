@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Returns & Exchanges — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+
+<div id="site-header" data-active="returns"></div>
+
+<main class="container section-tight">
+  <div class="breadcrumb">
+    <span>Home</span>
+    <span>/</span>
+    <span style="color:var(--color-fg);font-weight:600;">Returns & Exchanges</span>
+  </div>
+
+  <h1 style="font-size:clamp(1.8rem,3vw,2.4rem);margin-bottom:var(--space-3);">Returns & Exchanges</h1>
+  <p class="text-muted" style="max-width:60ch;margin-bottom:var(--space-6);">Not quite right? No problem. Fill in the form below and we'll take it from there, no need to email anyone.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-7);">
+    <div style="border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);">
+      <div class="badge-pill" style="margin-bottom:var(--space-3);">Step 1</div>
+      <h3 style="font-size:1.05rem;margin-bottom:var(--space-2);">Tell us about it</h3>
+      <p class="text-muted" style="font-size:.9rem;line-height:1.7;">Fill in the request form below with your order details and the reason for the return. It takes about a minute.</p>
+    </div>
+    <div style="border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);">
+      <div class="badge-pill" style="margin-bottom:var(--space-3);">Step 2</div>
+      <h3 style="font-size:1.05rem;margin-bottom:var(--space-2);">We'll confirm by email</h3>
+      <p class="text-muted" style="font-size:.9rem;line-height:1.7;">Within 24 hours you'll receive collection instructions or a courier drop-off point, whichever suits your area.</p>
+    </div>
+    <div style="border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);">
+      <div class="badge-pill" style="margin-bottom:var(--space-3);">Step 3</div>
+      <h3 style="font-size:1.05rem;margin-bottom:var(--space-2);">Get refunded or exchanged</h3>
+      <p class="text-muted" style="font-size:.9rem;line-height:1.7;">Once we receive and inspect the item, refunds land back in your account within 5 to 7 working days, or your exchange ships out.</p>
+    </div>
+  </div>
+
+  <!-- RETURN / EXCHANGE REQUEST FORM -->
+  <div style="max-width:720px;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin-bottom:var(--space-7);" id="return-form-wrap">
+    <h2 style="font-size:1.3rem;margin-bottom:var(--space-1);">Start a Return or Exchange</h2>
+    <p class="text-muted" style="font-size:.88rem;margin-bottom:var(--space-5);">No account needed, just your order details.</p>
+
+    <form id="return-form" novalidate>
+      <div class="form-grid">
+        <div class="form-field"><label>Full Name</label><input type="text" id="rf-name" required /><span class="error-msg">Please enter your name.</span></div>
+        <div class="form-field"><label>Email Address</label><input type="email" id="rf-email" required /><span class="error-msg">Please enter a valid email address.</span></div>
+        <div class="form-field"><label>Mobile Number</label><input type="tel" id="rf-phone" placeholder="e.g. 082 123 4567" required /><span class="error-msg">Please enter a valid mobile number.</span></div>
+        <div class="form-field"><label>Order Number</label><input type="text" id="rf-order-number" placeholder="e.g. NEU483920" required /><span class="error-msg">Please enter your order number.</span></div>
+        <div class="form-field"><label>Order Date</label><input type="date" id="rf-order-date" required /><span class="error-msg">Please select the order date.</span></div>
+        <div class="form-field">
+          <label>Request Type</label>
+          <select id="rf-type" required>
+            <option value="">Select one</option>
+            <option value="Return for refund">Return for refund</option>
+            <option value="Exchange for different size">Exchange for different size</option>
+            <option value="Exchange for different item">Exchange for different item</option>
+          </select>
+          <span class="error-msg">Please select a request type.</span>
+        </div>
+        <div class="form-field full">
+          <label>Reason for Return</label>
+          <select id="rf-reason" required>
+            <option value="">Select a reason</option>
+            <option value="Doesn't fit">Doesn't fit</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Item faulty or damaged">Item faulty or damaged</option>
+            <option value="Wrong item received">Wrong item received</option>
+            <option value="Not as described">Not as described</option>
+            <option value="Other">Other</option>
+          </select>
+          <span class="error-msg">Please select a reason.</span>
+        </div>
+        <div class="form-field full">
+          <label>Anything else we should know? (optional)</label>
+          <input type="text" id="rf-notes" placeholder="e.g. preferred replacement size" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:var(--space-3);">Submit Request</button>
+    </form>
+
+    <div id="return-form-success" style="display:none;text-align:center;padding:var(--space-6) 0;">
+      <div class="success-icon" style="width:56px;height:56px;margin:0 auto var(--space-4);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h3 style="font-size:1.15rem;">Request received</h3>
+      <p class="text-muted" style="font-size:.9rem;margin-top:var(--space-2);">Reference <strong id="return-ref" style="color:var(--color-fg);"></strong> — we've sent a confirmation to your email and will follow up within 24 hours with next steps.</p>
+    </div>
+  </div>
+
+  <div class="accordion" style="max-width:760px;">
+    <div class="accordion-item">
+      <div class="accordion-head">Are returns free?
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="accordion-body">Yes, full-price items are returned free of charge. Sale items can be returned for store credit only, unless faulty.</div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-head">Can I exchange for a different size instead?
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="accordion-body">Yes. Select "Exchange for different size" above and mention your preferred size in the notes field. We'll ship the replacement as soon as your original item is scanned by the courier, no need to wait for it to arrive back with us first.</div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-head">What if my item arrives faulty or wrong?
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="accordion-body">Submit the form above with as much detail as you can. We'll arrange a free collection and send a replacement or full refund, your choice.</div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-head">How long does a refund take to reflect?
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="accordion-body">Once processed on our end, refunds typically reflect within 5 to 7 working days, depending on your bank.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:var(--space-7);">
+    <a href="shop.html" class="btn btn-outline">Continue Shopping</a>
+  </div>
+
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="header.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  document.getElementById('return-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+    const fields = ['rf-name','rf-email','rf-phone','rf-order-number','rf-order-date','rf-type','rf-reason'];
+    fields.forEach(id => {
+      const input = document.getElementById(id);
+      const group = input.closest('.form-field');
+      let fieldValid = input.value.trim().length > 0;
+      if (id === 'rf-email' && fieldValid) fieldValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+      if (id === 'rf-phone' && fieldValid) fieldValid = /^(0|\+27)[0-9\s]{8,10}$/.test(input.value.trim());
+      group.classList.toggle('invalid', !fieldValid);
+      if (!fieldValid) valid = false;
+    });
+    if (!valid) return;
+
+    const ref = 'RET' + Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('return-ref').textContent = '#' + ref;
+    document.getElementById('return-form').style.display = 'none';
+    document.getElementById('return-form-success').style.display = 'block';
+    showToast('Return request submitted');
+  });
+</script>
+</body>
+</html>

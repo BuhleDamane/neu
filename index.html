@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Néu — Unisex Fashion, Reimagined</title>
+<meta name="description" content="Néu is a unisex fashion house for jackets, tailoring, footwear and accessories built for every body, every day." />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+
+<div id="site-header" data-active="home"></div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="hero-spacer-top"></div>
+      <div class="hero-content">
+        <span class="hero-eyebrow">The New Season Edit</span>
+        <h1>Tailored for<br>everyone.</h1>
+        <p>Néu is a unisex wardrobe built around clean lines, honest materials and pieces that outlast the trend cycle. Jackets, tailoring, footwear and accessories designed to move between everyone, every day.</p>
+        <div class="hero-actions">
+          <a href="shop.html" class="btn btn-primary btn-sm">Shop All</a>
+          <a href="shop.html?category=Jackets" class="btn btn-outline btn-sm">New Arrivals</a>
+        </div>
+      </div>
+      <div class="hero-spacer-bottom"></div>
+    </div>
+    <div class="hero-image">
+      <img src="assets/products/Jackets_2.jpg" alt="Model wearing a tailored black leather jacket" />
+    </div>
+  </section>
+
+  <!-- CATEGORY MARQUEE (right to left) -->
+  <section class="container" style="padding-top:var(--space-8);padding-bottom:var(--space-4);">
+    <div class="section-head" style="margin-bottom:var(--space-4);">
+      <div>
+        <span class="eyebrow">Shop by Category</span>
+        <h2>Find your fit</h2>
+      </div>
+      <a href="shop.html" class="link-arrow">View all
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+  </section>
+  <div class="marquee-wrap">
+    <div class="marquee-track dir-rtl" id="category-marquee"></div>
+  </div>
+
+  <!-- BESTSELLERS MARQUEE (left to right) -->
+  <section class="container" style="padding-top:var(--space-9);padding-bottom:var(--space-4);">
+    <div class="section-head" style="margin-bottom:var(--space-4);">
+      <div>
+        <span class="eyebrow">Fan Favourites</span>
+        <h2>Bestsellers</h2>
+      </div>
+      <a href="shop.html" class="link-arrow">Shop all
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+  </section>
+  <div class="marquee-wrap">
+    <div class="marquee-track dir-ltr" id="bestseller-marquee"></div>
+  </div>
+
+  <!-- BRAND STATEMENT (replaces lookbook image banner) -->
+  <section class="container" style="padding-top:var(--space-9);padding-bottom:var(--space-8);">
+    <div class="brand-statement">
+      <span class="eyebrow">Why Néu</span>
+      <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);">One wardrobe, worn a hundred different ways</h2>
+      <p>We design every piece to move between bodies and occasions without losing shape or character. Loosen it, layer it, dress it up. The clothes do the adapting, not you.</p>
+      <div class="links-row">
+        <a href="shop.html?category=Trousers" class="link-arrow">Shop Trousers
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+        <a href="shop.html?category=Jackets" class="link-arrow">Shop Outerwear
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW ARRIVALS (4, centered) -->
+  <section class="section container">
+    <div class="section-head centered">
+      <span class="eyebrow">Just Landed</span>
+      <h2>New Arrivals</h2>
+    </div>
+    <div class="product-grid" id="new-grid"></div>
+    <div style="text-align:center;margin-top:var(--space-6);">
+      <a href="shop.html?sort=new" class="link-arrow">View all new arrivals
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- VALUE PROPS -->
+  <section style="background:var(--color-muted);padding:var(--space-7) 0;">
+    <div class="container" style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-6);">
+      <div style="display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-start;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+        <strong style="font-size:.95rem;">Nationwide Delivery</strong>
+        <span class="text-muted" style="font-size:.85rem;">2 to 4 working days, all of South Africa</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-start;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <strong style="font-size:.95rem;">30-Day Returns</strong>
+        <span class="text-muted" style="font-size:.85rem;">Free exchanges on all full-price items</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-start;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <strong style="font-size:.95rem;">Secure Payments</strong>
+        <span class="text-muted" style="font-size:.85rem;">Card, EFT and OZOW Instant EFT</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-start;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <strong style="font-size:.95rem;">Made to Last</strong>
+        <span class="text-muted" style="font-size:.85rem;">Considered materials, built to be worn</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="container" style="text-align:center;padding:var(--space-8) 0;">
+    <div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:var(--space-4);align-items:center;">
+      <span class="eyebrow">Stay in the loop</span>
+      <h2 style="font-size:1.8rem;">Get 10% off your first order</h2>
+      <p class="text-muted">Sign up for early access to new drops and studio sales.</p>
+      <form class="newsletter-form" style="width:100%;max-width:380px;" onsubmit="event.preventDefault(); showToast('Thanks — check your inbox for your code.');">
+        <input type="email" required placeholder="Email address" style="color:var(--color-fg);border-color:var(--color-border);" />
+        <button type="submit" class="btn btn-primary">Join</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="header.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  // Category marquee — duplicated once for seamless loop
+  const catCardsHTML = CATEGORIES.map(cat => `
+    <a class="category-card" href="shop.html?category=${encodeURIComponent(cat)}">
+      <img src="${CATEGORY_BANNER[cat]}" alt="${cat}" loading="lazy" />
+      <span>${cat}</span>
+    </a>
+  `).join('');
+  document.getElementById('category-marquee').innerHTML = catCardsHTML + catCardsHTML;
+
+  // Bestseller marquee
+  const bestsellers = PRODUCTS.filter(p => p.tag === 'Bestseller');
+  const bestsellerPool = bestsellers.length ? bestsellers : PRODUCTS.slice(0, 6);
+  const bestCardsHTML = bestsellerPool.map(productCardHTML).join('');
+  document.getElementById('bestseller-marquee').innerHTML = bestCardsHTML + bestCardsHTML;
+
+  // New arrivals — four items
+  const newArrivals = PRODUCTS.filter(p => p.tag === 'New' || p.tag === 'Limited').slice(0, 4);
+  renderProductGrid(document.getElementById('new-grid'), newArrivals.length ? newArrivals : PRODUCTS.slice(0, 4));
+</script>
+</body>
+</html>

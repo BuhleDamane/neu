@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="doc-title">Product — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+
+<div id="site-header" data-active="products"></div>
+
+<main class="container">
+  <div class="breadcrumb" id="breadcrumb"></div>
+
+  <div class="pd-layout" id="pd-root"></div>
+
+  <section class="section-tight" id="related-section" style="display:none;">
+    <div class="section-head">
+      <div><span class="eyebrow">You Might Also Like</span><h2>Complete the look</h2></div>
+    </div>
+    <div class="product-grid" id="related-grid"></div>
+  </section>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="header.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const product = getProductById(params.get('id'));
+  const root = document.getElementById('pd-root');
+
+  if (!product) {
+    root.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <h2>Product not found</h2>
+      <a href="shop.html" class="btn btn-primary">Back to Shop</a>
+    </div>`;
+  } else {
+    document.getElementById('doc-title').textContent = product.name + ' — Néu';
+    document.getElementById('breadcrumb').innerHTML = `
+      <a href="index.html">Home</a>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      <a href="shop.html?category=${encodeURIComponent(product.category)}">${product.category}</a>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      <span style="color:var(--color-fg);font-weight:600;">${product.name}</span>
+    `;
+
+    let selectedSize = null;
+    let qty = 1;
+    let activeImgIndex = 0;
+
+    function priceForSize(sizeLabel) {
+      const s = product.sizes.find(s => s.label === sizeLabel);
+      return product.price + (s ? s.priceDelta : 0);
+    }
+
+    function renderPD() {
+      const thumbs = product.images.map((img, i) => `
+        <div class="pd-thumb ${i === activeImgIndex ? 'active' : ''}" onclick="setActiveImg(${i})">
+          <img src="${img}" alt="${product.name} view ${i+1}" />
+        </div>
+      `).join('');
+
+      const sizeChips = product.sizes.map(s => `
+        <div class="size-chip ${selectedSize === s.label ? 'selected' : ''}" onclick="selectSize('${s.label}')">${s.label}</div>
+      `).join('');
+
+      const displayPrice = selectedSize ? priceForSize(selectedSize) : product.price;
+      const priceRangeNote = (() => {
+        const prices = product.sizes.map(s => product.price + s.priceDelta);
+        const min = Math.min(...prices), max = Math.max(...prices);
+        return min === max ? '' : `<div class="text-muted" style="font-size:.82rem;">Price varies by size, from ${formatZAR(min)} to ${formatZAR(max)}</div>`;
+      })();
+
+      root.innerHTML = `
+        <div class="pd-gallery">
+          <div class="pd-main-img"><img src="${product.images[activeImgIndex]}" alt="${product.name}" /></div>
+          ${product.images.length > 1 ? `<div class="pd-thumbs">${thumbs}</div>` : ''}
+        </div>
+        <div class="pd-info">
+          <span class="p-cat">${product.category} ${product.tag ? '· ' + product.tag : ''}</span>
+          <h1>${product.name}</h1>
+          <div class="pd-price" id="pd-price">${formatZAR(displayPrice)}</div>
+          ${priceRangeNote}
+          <p class="pd-desc">${product.description}</p>
+          <div class="pd-divider"></div>
+          <div class="size-label-row">
+            <strong style="font-size:.9rem;">Select Size ${selectedSize ? '— ' + selectedSize : ''}</strong>
+            <span class="size-guide-link">Size Guide</span>
+          </div>
+          <div class="size-grid">${sizeChips}</div>
+          <div id="size-error" style="display:none;color:var(--color-error);font-size:.8rem;margin-top:var(--space-2);">Please select a size before adding to cart.</div>
+
+          <div class="qty-row">
+            <div class="qty-control">
+              <button onclick="changeQty(-1)" aria-label="Decrease quantity">−</button>
+              <span id="qty-display">${qty}</span>
+              <button onclick="changeQty(1)" aria-label="Increase quantity">+</button>
+            </div>
+            <span class="text-muted" style="font-size:.85rem;">In stock, ready to ship</span>
+          </div>
+
+          <div class="pd-actions">
+            <button class="btn btn-primary btn-block" id="add-cart-btn" onclick="handleAddToCart()">Add to Cart</button>
+          </div>
+
+          <ul class="pd-meta-list">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon></svg> Free delivery on orders over R1500</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg> 30-day free returns</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Secure checkout via card, EFT or OZOW</li>
+          </ul>
+
+          <div class="accordion">
+            <div class="accordion-item">
+              <div class="accordion-head">Details & Materials
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body"><ul style="padding-left:1.1rem;">${product.details.map(d => `<li>${d}</li>`).join('')}</ul></div>
+            </div>
+            <div class="accordion-item">
+              <div class="accordion-head">Shipping & Returns
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="accordion-body">Orders are dispatched within 24 hours and delivered within 2–4 working days across South Africa. Free returns within 30 days of delivery, provided items are unworn and in original packaging.</div>
+            </div>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      initAccordions();
+    }
+
+    window.setActiveImg = function(i) { activeImgIndex = i; renderPD(); };
+    window.selectSize = function(label) {
+      selectedSize = label;
+      document.getElementById('size-error').style.display = 'none';
+      renderPD();
+    };
+    window.changeQty = function(delta) {
+      qty = Math.max(1, qty + delta);
+      document.getElementById('qty-display').textContent = qty;
+    };
+    window.handleAddToCart = function() {
+      if (!selectedSize) {
+        document.getElementById('size-error').style.display = 'block';
+        return;
+      }
+      addToCart(product.id, selectedSize, qty);
+      showToast(`Added to cart — ${product.name} (${selectedSize})`);
+    };
+
+    renderPD();
+
+    // Related products
+    const related = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+    if (related.length) {
+      document.getElementById('related-section').style.display = '';
+      renderProductGrid(document.getElementById('related-grid'), related);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Cart — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+
+<div id="site-header" data-active=""></div>
+
+<main class="container section-tight">
+  <h1 style="font-size:clamp(1.8rem,3vw,2.4rem);margin-bottom:var(--space-6);">Your Cart</h1>
+  <div id="cart-root"></div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="header.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  const DELIVERY_FEE = 120;
+  const FREE_DELIVERY_THRESHOLD = 1500;
+
+  function renderCart() {
+    const root = document.getElementById('cart-root');
+    const items = cartLineItems();
+
+    if (!items.length) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="color:#c8c8c4;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <h2 style="font-size:1.3rem;">Your cart is empty</h2>
+          <p class="text-muted">Looks like you haven't added anything yet.</p>
+          <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+        </div>
+      `;
+      return;
+    }
+
+    const subtotal = cartSubtotal();
+    const delivery = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
+    const total = subtotal + delivery;
+
+    const itemsHTML = items.map(i => `
+      <div class="cart-item">
+        <img src="${i.product.images[0]}" alt="${i.product.name}" />
+        <div class="cart-item-info">
+          <span class="name">${i.product.name}</span>
+          <span class="variant">Size: ${i.size}</span>
+          <span class="variant">${formatZAR(i.unitPrice)} each</span>
+          <div class="qty-control" style="margin-top:var(--space-2);width:fit-content;">
+            <button onclick="changeCartQty('${i.productId}','${i.size}',${i.qty - 1})" aria-label="Decrease quantity">−</button>
+            <span>${i.qty}</span>
+            <button onclick="changeCartQty('${i.productId}','${i.size}',${i.qty + 1})" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div class="cart-item-right">
+          <strong>${formatZAR(i.lineTotal)}</strong>
+          <button class="remove-link" onclick="removeItem('${i.productId}','${i.size}')">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    root.innerHTML = `
+      <div class="cart-layout">
+        <div class="checkout-form-card">
+          <a href="shop.html" class="link-arrow" style="margin-bottom:var(--space-5);display:inline-flex;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Continue Shopping
+          </a>
+          ${itemsHTML}
+        </div>
+        <div class="summary-card">
+          <h3 style="font-size:1.1rem;">Order Summary</h3>
+          <div class="promo-row">
+            <input type="text" placeholder="Promo code" id="promo-input" />
+            <button class="btn btn-outline btn-sm" onclick="applyPromo()">Apply</button>
+          </div>
+          <div id="promo-msg" style="font-size:.8rem;display:none;"></div>
+          <div class="divider-line"></div>
+          <div class="summary-row"><span>Subtotal</span><span>${formatZAR(subtotal)}</span></div>
+          <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'Free' : formatZAR(delivery)}</span></div>
+          ${delivery > 0 ? `<div class="text-muted" style="font-size:.78rem;">Add ${formatZAR(FREE_DELIVERY_THRESHOLD - subtotal)} more for free delivery</div>` : ''}
+          <div class="summary-row total"><span>Total</span><span>${formatZAR(total)}</span></div>
+          <button class="btn btn-primary btn-block" onclick="location.href='checkout.html'">Proceed to Checkout</button>
+        </div>
+      </div>
+    `;
+  }
+
+  window.changeCartQty = function(productId, size, qty) {
+    updateCartQty(productId, size, qty);
+    renderCart();
+  };
+  window.removeItem = function(productId, size) {
+    removeFromCart(productId, size);
+    renderCart();
+    showToast('Item removed from cart');
+  };
+  window.applyPromo = function() {
+    const val = document.getElementById('promo-input').value.trim().toUpperCase();
+    const msg = document.getElementById('promo-msg');
+    msg.style.display = 'block';
+    if (val === 'NEU10') {
+      msg.style.color = 'var(--color-success)';
+      msg.textContent = 'Code applied — 10% off will be reflected at checkout.';
+    } else if (val === '') {
+      msg.style.display = 'none';
+    } else {
+      msg.style.color = 'var(--color-error)';
+      msg.textContent = 'This code is invalid or has expired.';
+    }
+  };
+
+  renderCart();
+</script>
+</body>
+</html>

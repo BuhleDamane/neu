@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Confirmed — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+<style>body{padding-top:77px;}.site-header-inner{top:0!important;}</style>
+</head>
+<body>
+
+<header class="site-header-inner">
+  <div class="container nav-row">
+    <div class="logo" onclick="location.href='index.html'">Néu</div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="success-wrap" id="success-root"></div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  const order = JSON.parse(localStorage.getItem('neu_last_order') || 'null');
+  const root = document.getElementById('success-root');
+
+  if (!order) {
+    root.innerHTML = `
+      <h2>No recent order found</h2>
+      <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+    `;
+  } else {
+    const methodLabel = {
+      card: 'Credit / Debit Card',
+      ozow: `Instant EFT via OZOW (${order.bank})`,
+      eft: `Manual EFT (${order.bank})`,
+    }[order.method];
+
+    const itemsHTML = order.items.map(i => `
+      <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-3);">
+        <img src="${i.image}" alt="${i.name}" style="width:52px;height:64px;object-fit:cover;border-radius:var(--radius-sm);" />
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:.88rem;">${i.name}</div>
+          <div class="text-muted" style="font-size:.78rem;">Size ${i.size} · Qty ${i.qty}</div>
+        </div>
+        <div style="font-size:.88rem;font-weight:600;">${formatZAR(i.lineTotal)}</div>
+      </div>
+    `).join('');
+
+    const BRANCH_CODES = {
+      'FNB': '250655',
+      'Standard Bank': '051001',
+      'ABSA': '632005',
+      'Nedbank': '198765',
+      'Capitec': '470010',
+      'TymeBank': '678910',
+      'Discovery Bank': '679000',
+      'African Bank': '430000',
+      'Bidvest Bank': '462005',
+    };
+    const eftNote = order.method === 'eft' ? `
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);margin-top:var(--space-4);text-align:left;">
+        <strong style="font-size:.85rem;">Banking Details</strong>
+        <div class="text-muted" style="font-size:.82rem;margin-top:var(--space-2);line-height:1.8;">
+          Bank: ${order.bank}<br>
+          Account Name: Néu (Pty) Ltd<br>
+          Account Number: 62812345678<br>
+          Branch Code: ${BRANCH_CODES[order.bank] || '250655'}<br>
+          Reference: ${order.orderNumber}
+        </div>
+      </div>
+    ` : '';
+
+    root.innerHTML = `
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h1 style="font-size:1.8rem;">Order Confirmed</h1>
+      <p class="text-muted">Thank you${order.shipping.firstName ? ', ' + order.shipping.firstName : ''} — your order <strong style="color:var(--color-fg);">#${order.orderNumber}</strong> has been placed successfully.</p>
+      <p class="text-muted" style="font-size:.85rem;">A confirmation has been sent to ${order.shipping.email || 'your email address'}.</p>
+
+      <div class="order-summary-box">
+        <strong style="font-size:.95rem;">Order Summary</strong>
+        <div style="margin-top:var(--space-4);">${itemsHTML}</div>
+        <div class="divider-line"></div>
+        <div class="summary-row" style="margin-top:var(--space-3);"><span>Subtotal</span><span>${formatZAR(order.subtotal)}</span></div>
+        <div class="summary-row"><span>Delivery</span><span>${order.delivery === 0 ? 'Free' : formatZAR(order.delivery)}</span></div>
+        <div class="summary-row total"><span>Total Paid</span><span>${formatZAR(order.total)}</span></div>
+        <div class="divider-line" style="margin:var(--space-4) 0;"></div>
+        <div style="font-size:.85rem;"><strong>Payment Method:</strong> ${methodLabel}</div>
+        <div style="font-size:.85rem;margin-top:var(--space-2);"><strong>Delivery Address:</strong><br>${order.shipping.address}, ${order.shipping.city}, ${order.shipping.province} ${order.shipping.postal}</div>
+        ${eftNote}
+      </div>
+
+      <div style="display:flex;gap:var(--space-3);margin-top:var(--space-6);">
+        <a href="shop.html" class="btn btn-outline">Continue Shopping</a>
+        <a href="index.html" class="btn btn-primary">Back to Home</a>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>

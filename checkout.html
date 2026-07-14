@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+<style>body{padding-top:77px;}.site-header-inner{top:0!important;}</style>
+</head>
+<body>
+
+<header class="site-header-inner">
+  <div class="container nav-row">
+    <div class="logo" onclick="location.href='index.html'">Néu</div>
+    <div style="display:flex;align-items:center;gap:var(--space-2);font-size:.85rem;color:#6b6b68;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      Secure Checkout
+    </div>
+  </div>
+</header>
+
+<main class="container section-tight">
+
+  <div class="checkout-steps">
+    <div class="step-pill done"><span class="num">✓</span> Cart</div>
+    <div class="step-pill active" id="step-shipping"><span class="num">2</span> Shipping</div>
+    <div class="step-pill" id="step-payment"><span class="num">3</span> Payment</div>
+  </div>
+
+  <div id="checkout-root"></div>
+
+</main>
+
+<div class="processing-overlay" id="processing-overlay">
+  <div class="processing-card">
+    <div class="spinner"></div>
+    <strong id="processing-title">Processing your payment…</strong>
+    <p class="text-muted" id="processing-sub" style="font-size:.85rem;">Please don't close or refresh this page.</p>
+  </div>
+</div>
+
+<script src="products-data.js"></script>
+<script src="script.js"></script>
+<script>
+  const DELIVERY_FEE = 120;
+  const FREE_DELIVERY_THRESHOLD = 1500;
+  let stage = 'shipping'; // shipping -> payment
+  let selectedPayMethod = 'card';
+  let selectedBank = null;
+  let shippingData = {};
+
+  const BANKS = ['FNB', 'Standard Bank', 'ABSA', 'Nedbank', 'Capitec', 'TymeBank', 'Discovery Bank', 'African Bank', 'Bidvest Bank'];
+  const BANK_LOGOS = {
+    'Standard Bank': 'assets/payments/standardbank.png',
+    'Nedbank': 'assets/payments/nedbank.png',
+    'Capitec': 'assets/payments/capitec.png',
+    'TymeBank': 'assets/payments/tymebank.png',
+  };
+  function bankChipHTML(context, b) {
+    const logo = BANK_LOGOS[b];
+    const inner = logo ? `<img src="${logo}" alt="${b}" /><span>${b}</span>` : `<span>${b}</span>`;
+    return `<div class="bank-chip" onclick="event.stopPropagation(); selectBank('${context}','${b}')">${inner}</div>`;
+  }
+
+  const items = cartLineItems();
+  if (!items.length) {
+    location.href = 'cart.html';
+  }
+
+  function orderTotals() {
+    const subtotal = cartSubtotal();
+    const delivery = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
+    return { subtotal, delivery, total: subtotal + delivery };
+  }
+
+  function summaryCardHTML() {
+    const { subtotal, delivery, total } = orderTotals();
+    const rows = items.map(i => `
+      <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-3);">
+        <img src="${i.product.images[0]}" alt="${i.product.name}" style="width:56px;height:70px;object-fit:cover;border-radius:var(--radius-sm);" />
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:.88rem;">${i.product.name}</div>
+          <div class="text-muted" style="font-size:.78rem;">Size ${i.size} · Qty ${i.qty}</div>
+        </div>
+        <div style="font-size:.88rem;font-weight:600;">${formatZAR(i.lineTotal)}</div>
+      </div>
+    `).join('');
+    return `
+      <div class="summary-card">
+        <h3 style="font-size:1.05rem;">Order Summary</h3>
+        ${rows}
+        <div class="divider-line"></div>
+        <div class="summary-row"><span>Subtotal</span><span>${formatZAR(subtotal)}</span></div>
+        <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'Free' : formatZAR(delivery)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${formatZAR(total)}</span></div>
+      </div>
+    `;
+  }
+
+  function renderShippingStage() {
+    const root = document.getElementById('checkout-root');
+    root.innerHTML = `
+      <div class="checkout-layout">
+        <div class="checkout-form-card">
+          <h2 style="font-size:1.3rem;margin-bottom:var(--space-5);">Shipping Details</h2>
+          <form id="shipping-form" novalidate>
+            <div class="form-grid">
+              <div class="form-field"><label>First Name</label><input type="text" id="firstName" required /><span class="error-msg">Please enter your first name.</span></div>
+              <div class="form-field"><label>Last Name</label><input type="text" id="lastName" required /><span class="error-msg">Please enter your last name.</span></div>
+              <div class="form-field full"><label>Email Address</label><input type="email" id="email" required /><span class="error-msg">Please enter a valid email address.</span></div>
+              <div class="form-field full"><label>Mobile Number</label><input type="tel" id="phone" placeholder="e.g. 082 123 4567" required /><span class="error-msg">Please enter a valid South African mobile number.</span></div>
+              <div class="form-field full"><label>Street Address</label><input type="text" id="address" required /><span class="error-msg">Please enter your street address.</span></div>
+              <div class="form-field"><label>City</label><input type="text" id="city" required /><span class="error-msg">Please enter your city.</span></div>
+              <div class="form-field">
+                <label>Province</label>
+                <select id="province" required>
+                  <option value="">Select province</option>
+                  <option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option>
+                  <option>Eastern Cape</option><option>Free State</option><option>Limpopo</option>
+                  <option>Mpumalanga</option><option>North West</option><option>Northern Cape</option>
+                </select>
+                <span class="error-msg">Please select your province.</span>
+              </div>
+              <div class="form-field"><label>Postal Code</label><input type="text" id="postal" required /><span class="error-msg">Please enter a valid postal code.</span></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top:var(--space-3);">Continue to Payment</button>
+          </form>
+        </div>
+        <div>${summaryCardHTML()}</div>
+      </div>
+    `;
+
+    document.getElementById('shipping-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+      const fields = ['firstName','lastName','email','phone','address','city','province','postal'];
+      fields.forEach(id => {
+        const input = document.getElementById(id);
+        const group = input.closest('.form-field');
+        let fieldValid = input.value.trim().length > 0;
+        if (id === 'email' && fieldValid) fieldValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+        if (id === 'phone' && fieldValid) fieldValid = /^(0|\+27)[0-9\s]{8,10}$/.test(input.value.trim());
+        group.classList.toggle('invalid', !fieldValid);
+        if (!fieldValid) valid = false;
+      });
+      if (!valid) return;
+      shippingData = Object.fromEntries(fields.map(id => [id, document.getElementById(id).value.trim()]));
+      stage = 'payment';
+      document.getElementById('step-shipping').classList.remove('active');
+      document.getElementById('step-shipping').classList.add('done');
+      document.getElementById('step-shipping').querySelector('.num').textContent = '✓';
+      document.getElementById('step-payment').classList.add('active');
+      renderPaymentStage();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  function renderPaymentStage() {
+    const root = document.getElementById('checkout-root');
+    const { total } = orderTotals();
+
+    root.innerHTML = `
+      <div class="checkout-layout">
+        <div class="checkout-form-card">
+          <h2 style="font-size:1.3rem;margin-bottom:var(--space-2);">Payment Method</h2>
+          <p class="text-muted" style="font-size:.88rem;margin-bottom:var(--space-5);">Shipping to ${shippingData.address}, ${shippingData.city} — <span style="text-decoration:underline;cursor:pointer;" onclick="backToShipping()">edit</span></p>
+
+          <div class="pay-methods">
+
+            <div class="pay-method selected" id="method-card" onclick="selectMethod('card')">
+              <div class="pay-method-head">
+                <div class="pay-method-head-left"><span class="radio-dot"></span> Credit / Debit Card</div>
+                <div class="pay-logos">
+                  <span class="pay-badge-logo"><img src="assets/payments/visa.png" alt="Visa" /></span>
+                  <span class="pay-badge-logo"><img src="assets/payments/mastercard.png" alt="Mastercard" /></span>
+                </div>
+              </div>
+              <div class="pay-method-body">
+                <div class="form-grid" style="margin-top:var(--space-4);">
+                  <div class="form-field full"><label>Card Number</label><input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" /></div>
+                  <div class="form-field full"><label>Name on Card</label><input type="text" id="cardName" placeholder="As it appears on your card" /></div>
+                  <div class="form-field"><label>Expiry Date</label><input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" /></div>
+                  <div class="form-field"><label>CVV</label><input type="text" id="cardCvv" placeholder="123" maxlength="4" /></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pay-method" id="method-ozow" onclick="selectMethod('ozow')">
+              <div class="pay-method-head">
+                <div class="pay-method-head-left"><span class="radio-dot"></span> Instant EFT via OZOW</div>
+                <div class="pay-logos"><span class="pay-badge-logo"><img src="assets/payments/ozow.png" alt="Ozow" /></span></div>
+              </div>
+              <div class="pay-method-body">
+                <p class="text-muted" style="font-size:.85rem;margin-top:var(--space-3);">Select your bank — you'll be redirected to securely log in and approve this payment.</p>
+                <div class="bank-grid" id="ozow-banks" style="margin-top:var(--space-3);"></div>
+              </div>
+            </div>
+
+            <div class="pay-method" id="method-eft" onclick="selectMethod('eft')">
+              <div class="pay-method-head">
+                <div class="pay-method-head-left"><span class="radio-dot"></span> Manual EFT / Bank Transfer</div>
+                <div class="pay-logos"><span class="pay-badge">EFT</span></div>
+              </div>
+              <div class="pay-method-body">
+                <p class="text-muted" style="font-size:.85rem;margin-top:var(--space-3);">We'll generate a unique reference number and banking details. Your order ships once payment reflects (1–2 business days).</p>
+                <div class="bank-grid" id="eft-banks" style="margin-top:var(--space-3);"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="secure-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Your payment information is encrypted and processed securely. Néu never stores your full card details.
+          </div>
+
+          <button class="btn btn-primary btn-block" id="pay-btn" style="margin-top:var(--space-6);">Pay ${formatZAR(total)}</button>
+          <button class="btn btn-outline btn-block" style="margin-top:var(--space-3);" onclick="backToShipping()">Back to Shipping</button>
+        </div>
+        <div>${summaryCardHTML()}</div>
+      </div>
+    `;
+
+    document.getElementById('ozow-banks').innerHTML = BANKS.map(b => bankChipHTML('ozow', b)).join('');
+    document.getElementById('eft-banks').innerHTML = BANKS.map(b => bankChipHTML('eft', b)).join('');
+
+    document.getElementById('cardNumber')?.addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+      e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+    });
+    document.getElementById('cardExpiry')?.addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      e.target.value = v;
+    });
+    document.getElementById('cardCvv')?.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    document.getElementById('pay-btn').addEventListener('click', handlePay);
+  }
+
+  window.selectMethod = function(method) {
+    selectedPayMethod = method;
+    selectedBank = null;
+    ['card','ozow','eft'].forEach(m => document.getElementById('method-' + m).classList.toggle('selected', m === method));
+  };
+  window.selectBank = function(context, bank) {
+    selectedBank = bank;
+    const container = document.getElementById(context + '-banks');
+    container.querySelectorAll('.bank-chip').forEach(chip => chip.classList.toggle('selected', chip.textContent === bank));
+  };
+  window.backToShipping = function() {
+    stage = 'shipping';
+    document.getElementById('step-payment').classList.remove('active');
+    document.getElementById('step-shipping').classList.add('active');
+    document.getElementById('step-shipping').classList.remove('done');
+    document.getElementById('step-shipping').querySelector('.num').textContent = '2';
+    renderShippingStage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  function handlePay() {
+    if (selectedPayMethod === 'card') {
+      const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+      const name = document.getElementById('cardName').value.trim();
+      const expiry = document.getElementById('cardExpiry').value.trim();
+      const cvv = document.getElementById('cardCvv').value.trim();
+      if (num.length < 16 || !name || !/^\d{2}\/\d{2}$/.test(expiry) || cvv.length < 3) {
+        showToast('Please complete all card details.');
+        return;
+      }
+    } else if ((selectedPayMethod === 'ozow' || selectedPayMethod === 'eft') && !selectedBank) {
+      showToast('Please select your bank to continue.');
+      return;
+    }
+
+    const overlay = document.getElementById('processing-overlay');
+    const title = document.getElementById('processing-title');
+    const sub = document.getElementById('processing-sub');
+    overlay.classList.add('show');
+
+    if (selectedPayMethod === 'ozow') {
+      title.textContent = `Redirecting to ${selectedBank} via OZOW…`;
+      sub.textContent = 'Securely connecting to your bank.';
+    } else if (selectedPayMethod === 'eft') {
+      title.textContent = 'Generating your payment reference…';
+      sub.textContent = 'Almost done.';
+    } else {
+      title.textContent = 'Processing your payment…';
+      sub.textContent = "Please don't close or refresh this page.";
+    }
+
+    setTimeout(() => {
+      const { subtotal, delivery, total } = orderTotals();
+      const order = {
+        orderNumber: 'NEU' + Math.floor(100000 + Math.random() * 900000),
+        items: items.map(i => ({ name: i.product.name, size: i.size, qty: i.qty, lineTotal: i.lineTotal, image: i.product.images[0] })),
+        subtotal, delivery, total,
+        method: selectedPayMethod,
+        bank: selectedBank,
+        shipping: shippingData,
+        date: new Date().toISOString(),
+      };
+      localStorage.setItem('neu_last_order', JSON.stringify(order));
+      localStorage.setItem(CART_KEY, JSON.stringify([]));
+      location.href = 'order-success.html';
+    }, 2200);
+  }
+
+  renderShippingStage();
+</script>
+</body>
+</html>

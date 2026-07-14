@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign In — Néu</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+<style>
+  .auth-wrap{max-width:420px;margin:0 auto;padding:var(--space-9) var(--space-4);}
+  .auth-tabs{display:flex;border-bottom:1px solid var(--color-border);margin-bottom:var(--space-6);}
+  .auth-tab{flex:1;text-align:center;padding:var(--space-3) 0;font-weight:600;font-size:.92rem;cursor:pointer;color:#9b9b97;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease);}
+  .auth-tab.active{color:var(--color-fg);border-color:var(--color-fg);}
+  .auth-panel{display:none;}
+  .auth-panel.active{display:flex;flex-direction:column;gap:var(--space-4);}
+</style>
+</head>
+<body>
+
+<div id="site-header" data-active=""></div>
+
+<main class="auth-wrap">
+  <h1 style="font-size:1.7rem;text-align:center;margin-bottom:var(--space-2);">Welcome to Néu</h1>
+  <p class="text-muted" style="text-align:center;font-size:.9rem;margin-bottom:var(--space-6);">Sign in to track orders, save your sizes, and check out faster.</p>
+
+  <div class="auth-tabs">
+    <div class="auth-tab active" data-tab="signin">Sign In</div>
+    <div class="auth-tab" data-tab="register">Create Account</div>
+  </div>
+
+  <form class="auth-panel active" id="signin-panel">
+    <div class="form-field"><label>Email Address</label><input type="email" required /></div>
+    <div class="form-field"><label>Password</label><input type="password" required /></div>
+    <div style="display:flex;justify-content:flex-end;">
+      <a href="#" style="font-size:.82rem;text-decoration:underline;color:#6b6b68;">Forgot password?</a>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+  </form>
+
+  <form class="auth-panel" id="register-panel">
+    <div class="form-grid">
+      <div class="form-field"><label>First Name</label><input type="text" required /></div>
+      <div class="form-field"><label>Last Name</label><input type="text" required /></div>
+    </div>
+    <div class="form-field"><label>Email Address</label><input type="email" required /></div>
+    <div class="form-field"><label>Password</label><input type="password" required /></div>
+    <div class="badge-pill" style="background:var(--color-muted);">New here? Get 10% off with code NEU10 at checkout</div>
+    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+  </form>
+
+  <p class="text-muted" style="text-align:center;font-size:.78rem;margin-top:var(--space-6);">By continuing you agree to Néu's Terms of Service and Privacy Policy.</p>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="products-data.js"></script>
+<script src="header.js"></script>
+<script src="footer.js"></script>
+<script src="script.js"></script>
+<script>
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab + '-panel').classList.add('active');
+    });
+  });
+
+  function handleAuthSubmit(form, button, successMessage) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Please wait…';
+      setTimeout(() => {
+        showToast(successMessage);
+        setTimeout(() => { location.href = 'index.html'; }, 900);
+      }, 700);
+    });
+  }
+
+  const signinForm = document.getElementById('signin-panel');
+  handleAuthSubmit(signinForm, signinForm.querySelector('button[type="submit"]'), 'Welcome back!');
+
+  const registerForm = document.getElementById('register-panel');
+  handleAuthSubmit(registerForm, registerForm.querySelector('button[type="submit"]'), 'Account created — welcome to Néu!');
+</script>
+</body>
+</html>
