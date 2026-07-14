@@ -217,8 +217,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .nav-item-dropdown .dd-panel{
     position:static;transform:none;opacity:1;pointer-events:auto;
     display:none;box-shadow:none;border:none;padding:var(--space-2) 0 0 var(--space-4);
+    min-width:0;width:100%;
   }
   .nav-item-dropdown.mobile-open .dd-panel{display:block;}
+  .nav-item-dropdown .dd-panel a{padding-left:0;padding-right:0;}
   .nav-item-dropdown .dd-trigger svg{transition:transform var(--dur-fast) var(--ease);}
   .nav-item-dropdown.mobile-open .dd-trigger svg{transform:rotate(180deg);}
 }
